@@ -1,0 +1,1 @@
+# scansnotify-bot
