@@ -1,0 +1,20 @@
+# bot requirements
+python-telegram-bot[job-queue]~=20.0
+
+# app requirements
+ascii
+regex
+packaging
+pyease-grpc>=1.6.0
+python-dotenv>=0.15.0,<2.0.0
+
+# dev requirements
+#wheel
+#black
+#flake8
+#tk-tools
+pyinstaller
+setuptools<=60.0.0
+# cryptography<=3.3.2
+# cssutils>=1.0.0,<2.7.0
+# win_unicode_console~=0.5
