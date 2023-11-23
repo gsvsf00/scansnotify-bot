@@ -5,7 +5,6 @@ import shutil
 from threading import Thread
 from typing import Dict, List, Optional, Tuple
 from urllib.parse import urlparse
-from mongodb_connection import connect_to_mongodb
 
 # from ..core.exeptions import LNException
 # from ..core.sources import crawler_list, prepare_crawler
@@ -14,7 +13,6 @@ from mongodb_connection import connect_to_mongodb
 # from .crawler import Crawler
 
 logger = logging.getLogger(__name__)
-mongodb_client, db, collection = connect_to_mongodb()
 
 class App:
     """Bots are based on top of an instance of this app"""

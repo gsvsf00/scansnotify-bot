@@ -2,7 +2,6 @@ import logging
 import os
 import re
 import shutil
-import pymongo
 from urllib.parse import urlparse
 
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
@@ -14,13 +13,12 @@ from scancrawl.core.mongodb import MongoDBHandler
 from scancrawl.model.TelegramUser import TelegramUser
 from scancrawl.model.Scan import Scan
 
-
-
 logger = logging.getLogger(__name__)
 
 
 class TelegramBot:
     def __init__(self):
+        # Initialize the MongoDB handler
         self.mongo_handler = MongoDBHandler()
 
     def start(self):
@@ -111,22 +109,33 @@ class TelegramBot:
         user_id = update.message.from_user.id
         user_data = self.mongo_handler.get_user_data(user_id)
 
-        if user_data:
-            # User data exists, retrieve existing app instance
-            app = user_data["app"]
-        else:
-            # User data does not exist, create a new user and app instance
-            self.mongo_handler.create_user(user_id,
-                                        update.message.from_user.username,
-                                        update.message.from_user.first_name,
-                                        update.message.from_user.last_name)
-            app = App()
-            app.initialize()
-            user_data = {"user_id": user_id, "app": app}
-            # Save user data to MongoDB
-            self.mongo_handler.save_user_data(user_id, user_data)
+        if not user_data:
+            # User data does not exist, create a new user
+            self.mongo_handler.create_user(
+                user_id,
+                update.message.from_user.username,
+                update.message.from_user.first_name,
+                update.message.from_user.last_name
+            )
 
-        context.user_data["app"] = app
+            # Optionally, perform additional initialization for the new user
+            new_user = TelegramUser(
+                user_id,
+                update.message.from_user.username,
+                update.message.from_user.first_name,
+                update.message.from_user.last_name,
+            )
+
+            # Save the new user instance or perform any other necessary actions
+            user_data = {"user_id": user_id, "app": new_user}
+            self.mongo_handler.save_user_data(user_id, user_data)
+        else:
+            # User data exists, retrieve existing user instance
+            new_user = user_data["app"]
+
+        # Set the user instance in the context for further use
+        context.user_data["app"] = new_user
+
         await update.message.reply_text("A new session is created.")
         await update.message.reply_text(
             "I recognize input of these categories:\n"
