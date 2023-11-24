@@ -33,8 +33,10 @@ class App:
         self.good_file_name: str = ""
         self.no_suffix_after_filename = False
         atexit.register(self.destroy)
+        print("_init_")
 
     def __background(self, target_method, *args, **kwargs):
+        print("__background__")
         t = Thread(target=target_method, args=args, kwargs=kwargs)
         t.start()
         while t.is_alive():
@@ -44,11 +46,13 @@ class App:
 
     def initialize(self):
         logger.info("Initialized App")
+        print("Initialized App")
 
     def destroy(self):
-        if self.crawler:
-            self.crawler.__del__()
-        self.chapters.clear()
+        print("App destroyed")
+        #if self.crawler:
+            #self.crawler.__del__()
+        #self.chapters.clear()
         logger.info("App destroyed")
 
     # ----------------------------------------------------------------------- #

@@ -9,7 +9,7 @@ from telegram.ext import (Application, CommandHandler, ContextTypes,
                           ConversationHandler, Job, MessageHandler, filters)
 
 from scancrawl.core.app import App
-from scancrawl.core.mongodb import MongoDBHandler
+from scancrawl.core.mongodb_connection import MongoDBHandler
 from scancrawl.model.TelegramUser import TelegramUser
 from scancrawl.model.Scan import Scan
 
@@ -105,10 +105,13 @@ class TelegramBot:
         return ConversationHandler.END
 
     async def init_app(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        if context.user_data.get("app"):
+            print("Teste de start again")
+            await self.destroy_app(update, context)
         # Retrieve user data from MongoDB
         user_id = update.message.from_user.id
         user_data = self.mongo_handler.get_user_data(user_id)
-
+        
         if not user_data:
             # User data does not exist, create a new user
             self.mongo_handler.create_user(
@@ -129,12 +132,10 @@ class TelegramBot:
             # Save the new user instance or perform any other necessary actions
             user_data = {"user_id": user_id, "app": new_user}
             self.mongo_handler.save_user_data(user_id, user_data)
-        else:
-            # User data exists, retrieve existing user instance
-            new_user = user_data["app"]
 
-        # Set the user instance in the context for further use
-        context.user_data["app"] = new_user
+        app = App()
+        app.initialize()
+        context.user_data["app"] = app
 
         await update.message.reply_text("A new session is created.")
         await update.message.reply_text(
@@ -144,8 +145,10 @@ class TelegramBot:
         )
         return "handle_novel_url"
 
+
     async def handle_novel_url(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         if self.get_current_jobs(update, context):
+            print("Teste")
             app = context.user_data.get("app")
             await update.message.reply_text(
                 "%s\n"
@@ -154,6 +157,7 @@ class TelegramBot:
                 % (context.user_data.get("status"), app.progress, len(app.chapters))
             )
         else:
+            print("Teste2")
             if context.user_data.get("app"):
                 app = context.user_data.get("app")
             else:
@@ -168,7 +172,7 @@ class TelegramBot:
             except Exception:
                 await update.message.reply_text(
                     "Sorry! I only recognize these sources:\n"
-                    + "https://github.com/dipu-bd/lightnovel-crawler#supported-sources"
+                    + "link"
                 )
                 await update.message.reply_text(
                     "Enter something again or send /cancel to stop."

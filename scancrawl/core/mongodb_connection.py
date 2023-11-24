@@ -38,6 +38,10 @@ class MongoDBHandler:
             # Raise a custom exception if the connection fails
             raise MongoDBConnectionError(f"Failed to connect to MongoDB. Error: {e}")
 
+    def save_user_data(self, user_id, user_data):
+        # Save or update user data in MongoDB based on user_id
+        self.collection.update_one({"user_id": user_id}, {"$set": {"app": user_data}})
+
     def get_user_data(self, user_id):
         # Retrieve user data from MongoDB using the collection
         user_data = self.collection.find_one({"user_id": user_id})
